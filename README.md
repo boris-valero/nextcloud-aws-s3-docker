@@ -26,12 +26,14 @@ git clone https://github.com/boris-valero/nextcloud-aws-s3-docker.git
 
 ```bash
 cd nextcloud-aws-s3-docker
+cp .env.example .env (fichier .env.example fourni uniquement dans l'optique de la démonstration du projet)
 docker-compose up -d
 ```
-#### 4️⃣ Initialiser le script
+#### 4️⃣ Rendre le script exécutable et exécuter le script
 
 ```bash
 cd scripts
+chmod +x scripts/init_s3.sh
 ./init_s3.sh
 ```
 #### 5️⃣ Configurer Nextcloud
