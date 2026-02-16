@@ -1,7 +1,6 @@
 # nextcloud-aws-s3-docker
 
-Ce projet démontre le déploiement de Nextcloud avec un stockage externe S3
-simulé par LocalStack, le tout orchestré avec Docker Compose.
+Ce projet démontre le déploiement de Nextcloud avec un stockage externe S3 simulé par LocalStack, le tout orchestré avec Docker Compose.
 
 ## Déploiement
 
@@ -39,11 +38,12 @@ cd scripts
 
 1.  Accéder à http://localhost:8082
 2.  Créer un compte administrateur avec, par exemple :
-  - Utilisateur : `admin`
-  - Mot de passe : `admin`
-3.  Activer l'app "External storage support"
-4.  Aller dans Paramètres > Stockages externes
-5.  Ajouter un stockage Amazon S3 avec :
+  - Utilisateur : `admin` (ou celui de votre choix)
+  - Mot de passe : `admin` (ou celui de votre choix)
+3.  Aller dans le menu de Nextcloud > Applications  
+4.  Allez dans les applications désactivées, et activer l'application "External storage support"
+5.  Aller dans le menu de Nextcloud > Paramètres d'administration > Stockages externes
+6.  Ajouter un stockage Amazon S3 avec :
   - Hostname : `localstack`
   - Port : `4566`
   - Bucket : `nextcloud-bucket`
