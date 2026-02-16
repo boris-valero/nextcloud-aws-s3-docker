@@ -26,6 +26,7 @@ git clone https://github.com/boris-valero/nextcloud-aws-s3-docker.git
 #### 3️⃣ Lancer les services
 
 ```bash
+cd nextcloud-aws-s3-docker
 docker-compose up -d
 ```
 #### 4️⃣ Initialiser le script
