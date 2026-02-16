@@ -1,0 +1,62 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_DB: nextcloud
+      POSTGRES_USER: nextcloud
+      POSTGRES_PASSWORD: nextcloud-aws-s3-docker
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - nextcloud-network
+
+  nextcloud:
+    image: nextcloud:31-apache
+    restart: always
+    ports:
+      - 8082:80
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PASSWORD: nextcloud-aws-s3-docker
+      POSTGRES_DB: nextcloud
+      POSTGRES_USER: nextcloud
+    volumes:
+      - nextcloud_data:/var/www/html
+      - ./custom_apps:/var/www/html/custom_apps
+      - ./install_nextcloud_apps.sh:/install_nextcloud_apps.sh
+    depends_on:
+      - db
+    networks:
+      - nextcloud-network
+
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    restart: always
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack/data
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=nextcloud-aws-s3
+      - AWS_SECRET_ACCESS_KEY=nextcloud-aws-s3
+    volumes:
+      - ./localstack:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - nextcloud-network
+
+volumes:
+  db_data:
+    name: nextcloud_localstack_db
+  nextcloud_data:
+    name: nextcloud_localstack_data
+
+networks:
+  nextcloud-network:
+    name: nextcloud-network
+    driver: bridge
