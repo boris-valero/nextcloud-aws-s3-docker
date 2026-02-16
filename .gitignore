@@ -1,0 +1,14 @@
+nextcloud/
+db/
+localstack/
+
+.DS_Store
+Thumbs.db
+
+.env
+*.log
+
+.vscode/
+.idea/
+*.swp
+*.swo
