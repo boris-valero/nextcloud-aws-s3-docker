@@ -19,8 +19,8 @@ orchestration et object storage. Dans ce projet, l'architecture est composée de
 |Service        |Technologie        |Rôle                                     |
 |---------------|-------------------|-----------------------------------------|
 |Application    |Nextcloud 31 Apache|Plateforme de collaboration cloud        |
-|Base de données|PostgreSQL 16      |Stockage relationnel des métadonnées     |
-|Object Storage |LocalStack (AWS S3)|Simulation d'Amazon S3 pour testing local|
+|Base de données|PostgreSQL 16      |Stockage de la base de données           |
+|Object Storage |LocalStack (AWS S3)|Simulation d'Amazon S3                   |
 |Orchestration  |Docker Compose     |Orchestration multi-conteneur            |
 
 ## Déploiement
