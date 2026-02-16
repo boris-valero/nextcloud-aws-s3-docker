@@ -24,8 +24,6 @@ services:
       POSTGRES_USER: nextcloud
     volumes:
       - nextcloud_data:/var/www/html
-      - ./custom_apps:/var/www/html/custom_apps
-      - ./install_nextcloud_apps.sh:/install_nextcloud_apps.sh
     depends_on:
       - db
     networks:
