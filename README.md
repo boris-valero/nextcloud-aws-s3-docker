@@ -2,32 +2,44 @@
 
 ## Présentation
 
-Ce projet présente une architecture cloud complète avec containerization,
+Ce projet a pour but d'automatiser le déploiement d'une infrastructure
+Nextcloud avec pour espace de stockage principal un stockage de type AWS S3. Ce
+projet présente une architecture cloud complète avec containerization,
 orchestration et object storage. Dans ce projet, l'architecture est composée de
-: 
+:
 
 - **Containerization** : Déploiement d'applications via Docker, chaque service
   s'exécutant avec son conteneur sécurisé
 - **Infrastructure-as-Code (IaC)** : Configuration entièrement codifiée avec
   Docker Compose
-- **Cloud Object Storage** : Intégration d'AWS S3 pour le stockage scalable
+- **Cloud Object Storage** : AWS S3 configuré comme stockage principal de
+  Nextcloud
 - **Secrets Management** : Variables d'environnement pour protéger les credentials
+- **Automatisation** : Configuration S3 entièrement automatisée au démarrage
 
 ## Stacks utilisées
 
 
-|Service        |Technologie        |Rôle                                     |
-|---------------|-------------------|-----------------------------------------|
-|Application    |Nextcloud 31 Apache|Plateforme de collaboration cloud        |
-|Base de données|PostgreSQL 16      |Stockage de la base de données           |
-|Object Storage |LocalStack (AWS S3)|Simulation d'Amazon S3                   |
-|Orchestration  |Docker Compose     |Orchestration multi-conteneur            |
+|Service        |Technologie        |Rôle                                           |
+|---------------|-------------------|-----------------------------------------------|
+|Application    |Nextcloud 31 Apache|Plateforme de collaboration cloud              |
+|Base de données|PostgreSQL 16      |Stockage de la base de données                 |
+|Object Storage |LocalStack (AWS S3)|Stockage principal des fichiers (simule AWS S3)|
+|Orchestration  |Docker Compose     |Orchestration multi-conteneur                  |
 
 ## Déploiement
 
 ### Prérequis
 
 - Docker Compose
+
+### ⚠️ Important : Persistence des données
+
+**LocalStack Community** (version gratuite) ne supporte plus la persistence fiable depuis la v2.0. 
+
+**Conséquence** : Si vous arrêtez et redémarrez les conteneurs Docker, vous devez **obligatoirement relancer le déploiement avec le script start.sh** pour recréer le bucket S3 et réinitialiser l'infrastructure correctement.
+
+Pour une persistence fiable en production, utilisez AWS S3 réel ou LocalStack Pro.
 
 ### Étapes
 
@@ -41,59 +53,64 @@ cd nextcloud-localstack-project
 
 ```bash
 git clone https://github.com/boris-valero/nextcloud-aws-s3-docker.git
-```
-#### 3️⃣ Lancer les services
-
-```bash
 cd nextcloud-aws-s3-docker
-cp .env.example .env (fichier .env.example fourni uniquement dans l'optique de la démonstration du projet)
-docker-compose up -d
 ```
-#### 4️⃣ Rendre le script exécutable et exécuter le script
+#### 3️⃣ Configurer les credentials
 
 ```bash
-cd scripts
-chmod +x scripts/init_s3.sh
-./init_s3.sh
+cp .env.example .env
 ```
-#### 5️⃣ Configurer Nextcloud
+Vous pouvez modifiez le fichier `.env` avec vos propres valeurs :
 
-1.  Accéder à http://localhost:8082
-2.  Créer un compte administrateur avec, par exemple :
-- Utilisateur : `admin` (ou celui de votre choix)
-- Mot de passe : `admin` (ou celui de votre choix)
-3.  Aller dans le menu de Nextcloud > Applications
-4.  Allez dans les applications désactivées, et activer l'application "External
-    storage support"
-5.  Aller dans le menu de Nextcloud > Paramètres d'administration > Stockages
-    externes
-6.  Ajouter un stockage Amazon S3 avec :
-- Hostname : `localstack`
-- Port : `4566`
-- Bucket : `nextcloud-bucket`
-- Region : `us-east-1`
-- Access Key / Secret Key : `nextcloud-aws-s3` / `nextcloud-aws-s3`
-- **Enable SSL** : décoché
-- **Enable Path Style** : coché
+- `POSTGRES_PASSWORD` : Mot de passe de la base de données PostgreSQL
+- `AWS_CREDENTIALS` : Access Key AWS S3 (pour LocalStack, garder la valeur par
+  défaut)
+- `AWS_SECRET` : Secret Key AWS S3 (pour LocalStack, garder la valeur par défaut)
+- `NEXTCLOUD_ADMIN_USER` : Nom d'utilisateur administrateur Nextcloud
+- `NEXTCLOUD_ADMIN_PASSWORD` : Mot de passe administrateur Nextcloud
+
+**Note** : Pour une utilisation en production avec AWS S3 réel, remplacez les
+credentials AWS par vos vraies clés.
+
+#### 4️⃣ Lancer le déploiement
+
+```bash
+chmod +x start.sh
+./start.sh
+```
+**Note** : Le script start.sh automatise l'intégralité du déploiement de
+l'infrastructure. Il vérifie d'abord la présence du fichier .env (le crée
+depuis .env.example si absent), puis démarre tous les conteneurs Docker
+(Nextcloud, PostgreSQL, LocalStack). Il attend ensuite le démarrage de
+LocalStack et crée automatiquement le bucket S3 nextcloud-bucket. Le script
+patiente jusqu'à ce que Nextcloud termine son auto-installation (1-2 minutes
+maximum), qui configure automatiquement le compte administrateur et le stockage
+principal S3. Une fois terminé, il affiche les informations de connexion (URL,
+credentials, endpoint S3) pour accéder immédiatement à l'instance Nextcloud.
+
+#### 5️⃣ Accéder à Nextcloud
+
+Ouvrez votre navigateur à l'adresse : **http://localhost:8082**
+
+Nextcloud sera accessible avec les credentials définis dans votre fichier `.env`.
+
+**Important** : Le stockage S3 est déjà configuré automatiquement comme **
+stockage principal**. Tous les fichiers uploadés seront stockés directement dans
+le bucket S3.
 
 #### 6️⃣ Tester
 
-1.  Uploader un fichier dans le dossier S3 de Nextcloud
-2.  Vérifier dans un terminal que le fichier se soit bien chargé :
+1.  Uploader un fichier à partir de l'application Fichiers
+2.  Vérifier dans un terminal que le fichier se soit bien chargé grâce à la commande :
 
 ```bash
 docker exec -it localstack awslocal s3 ls s3://nextcloud-bucket/ --recursive
 ```
-
 ## Captures d'écran
 
-### Interface Nextcloud avec dossier S3
+### Interface Nextcloud avec chargement d'une image "regles clean_code.jpeg"
 
 ![image](screenshots/nextcloud-s3-folder.png)
-
-### Configuration du stockage externe
-
-![image](screenshots/s3-configuration.png)
 
 ### Vérification dans LocalStack
 
